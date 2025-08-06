@@ -1,0 +1,569 @@
+﻿<UserControl x:Class="MidiMusicForge.MidiEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MidiMusicForge"
+             xmlns:MidiEqualizerControl="clr-namespace:MidiMusicForge.Controls.MidiEditorControl.MidiEqualizerControl"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="750">
+    <Grid Name="MainGrid" KeyDown="MainGrid_KeyDown" Focusable="True"
+        MouseEnter="Toolboar_Grid_MouseEnter"
+        MouseLeave="Toolboar_Grid_MouseLeave">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200" />
+            <!--<RowDefinition Height="32" />-->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border BorderThickness="0" Grid.Row="0">
+            <Grid Background="#4D4D4D">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                   
+
+                    <Grid >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="64" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image Width="64" Grid.Column="0"
+                                x:Name="tilesetOrmapImg"
+                                Height="64"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/title.png" />
+
+                            
+                            <Button Grid.Column="1" Click="OpenMidiFile_Click"
+                                x:Name="loadTilemap_Btn"
+                                ToolTip="Load .ttmap Tilemap"
+                                BorderBrush="Transparent" 
+                                BorderThickness="0" 
+                                Background="Transparent">
+                                <Image x:Name="loadtilemapImg"
+                                       Width="32"
+                                       Height="32"
+                                       Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/openmidi.png" />
+                            </Button>
+
+                            <TextBox Grid.Column="2"
+                                x:Name="tilesetFileNameTxtBox"
+                                Height="25"
+                                TextAlignment="Left"
+                                Background="#0D1117"
+                                Foreground="#C2C3C5"
+                                Padding="0"
+                                FontSize="15"
+                                BorderThickness="0"
+                                IsReadOnly="True"
+                                HorizontalScrollBarVisibility="Hidden"
+                                VerticalScrollBarVisibility="Disabled"
+                                TextWrapping="NoWrap"
+                                Cursor="IBeam"
+                                IsReadOnlyCaretVisible="True" />
+                        </Grid>
+
+                        <MidiEqualizerControl:MidiEqualizerControl x:Name="midiEqControl" Grid.Row="1"
+                                Height="60"
+                                Background="Black"/>
+
+                        <Grid Grid.Row="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock x:Name="songTimeTextBlock" Grid.Row="0"
+                                Foreground="White"
+                                Text="00:00 / 00:00" 
+                                HorizontalAlignment="Center" 
+                                Margin="0,5,0,-20" />
+
+                            <Slider x:Name="SongProgressSlider" Grid.Row="1" 
+                                ValueChanged="SongProgressSlider_ValueChanged"
+                                Minimum="0"
+                                Maximum="{Binding SongDurationInSeconds}"
+                                Value="{Binding CurrentTimeInSeconds, Mode=TwoWay}"
+                                SmallChange="1"
+                                LargeChange="5"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                VerticalAlignment="Bottom"
+                                Margin="0,15,0,-10"
+                                />
+                        </Grid>
+
+                        <Grid Grid.Row="3" Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="19*" />
+                                <ColumnDefinition Width="305*"/>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="324*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                                <RepeatButton Click="Rewind_Click"
+                                    x:Name="rewindImgBtn"
+                                    Focusable="False"
+                                    IsTabStop="False"
+                                    ToolTip="Select"
+                                    BorderBrush="Transparent" 
+                                    BorderThickness="0" 
+                                    Background="Transparent"
+                                    Delay="500" Interval="100">
+                                    <Image Width="32" Height="32"
+                                        x:Name="rewindImg"
+                                        Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/rewind.png"
+                                        ToolTip="Save Tileset Image"/>
+                                </RepeatButton>
+                                <Button Click="PlayFile_Click"
+                                    x:Name="saveTilesetImgBtn"
+                                    Focusable="False"
+                                    IsTabStop="False"
+                                    ToolTip="Select"
+                                    BorderBrush="Transparent" 
+                                    BorderThickness="0" 
+                                    Background="Transparent">
+                                    <Image Width="32" Height="32"
+                                        x:Name="savetilesetImg"
+                                        Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/play.png"
+                                        ToolTip="Save Tileset Image"/>
+                                </Button>
+                                <RepeatButton Click="FastForward_Click"
+                                    x:Name="fastforwardImgBtn"
+                                    Focusable="False"
+                                    IsTabStop="False"
+                                    ToolTip="Select"
+                                    BorderBrush="Transparent" 
+                                    BorderThickness="0" 
+                                    Background="Transparent"
+                                    Delay="500" Interval="100">
+                                    <Image Width="32" Height="32"
+                                        x:Name="fastforwardImg"
+                                        Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/fastforward.png"
+                                        ToolTip="Fast Forward"/>
+                                </RepeatButton>
+                            </StackPanel>
+
+                            <Grid Grid.Column="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+
+                                    <Label Margin="0,8,-7,0"
+                                           FontSize="8"
+                                           Foreground="White"
+                                           >App Volume:</Label>
+                                    <Image Width="32" Height="32"
+                                        x:Name="volumeImg"
+                                        Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/volume2.png"
+                                        ToolTip="Save Tileset Image"
+                                        Margin="0,0,-15,0"
+                                        />
+
+                                    <Slider x:Name="VolumeSlider"
+                                        ValueChanged="VolumeSlider_ValueChanged"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        Value="50"
+                                        Width="100"
+                                        SmallChange="1"
+                                        LargeChange="5"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        VerticalAlignment="Bottom"
+                                        Margin="10"
+                                        />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Label Margin="0,8,-7,0"
+                                           FontSize="8"
+                                           Foreground="White"
+                                           >Sys Volume:</Label>
+                                    <Image Width="32" Height="32"
+                                        x:Name="volumeSystemImg"
+                                        Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/volume2.png"
+                                        ToolTip="System Volumne"
+                                        Margin="0,0,-15,0"
+                                        />
+
+                                    <Slider x:Name="VolumeSystemSlider"
+                                        ValueChanged="VolumeSystemSlider_ValueChanged"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        Value="50"
+                                        Width="100"
+                                        SmallChange="1"
+                                        LargeChange="5"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        VerticalAlignment="Bottom"
+                                        Margin="10"
+                                        />
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Grid>
+
+
+
+                    </Grid>
+
+                </Grid>
+
+            </Grid>
+        </Border>
+
+        <!--
+        <Border Background="#0D1117"
+                BorderThickness="0"
+                Grid.Row="1">
+            <Grid
+                Background="#0D1117"
+                Height="32"
+                >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="1" x:Name="bottomToolsBar"
+                            Orientation="Horizontal"
+                            Background="#0D1117">
+
+                    <Button Click="SelectGrid_Click"
+                        Visibility="Hidden"
+                        x:Name="selectBtn"
+                        Focusable="False"
+                        IsTabStop="False"
+                        ToolTip="Select"
+                        BorderBrush="Transparent" 
+                        BorderThickness="0" 
+                        Background="Transparent">
+                        <Image Width="32" Height="32"
+                           x:Name="select"
+                           Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/selectGrid.png"
+                           ToolTip="Select"/>
+                    </Button>
+
+                    <Button Click="Pencil_Click"
+                            Visibility="Hidden"
+                            x:Name="pencilBtn"
+                            Focusable="False"
+                            IsTabStop="False"
+                            ToolTip="Pencil"
+                            BorderBrush="Transparent" 
+                            BorderThickness="0" 
+                            Background="Transparent">
+                        <Image Width="32" Height="32"
+                               x:Name="pencil"
+                               Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/pencil.png"
+                               ToolTip="Select"/>
+                    </Button>
+                </StackPanel>
+
+            </Grid>
+
+        </Border>
+        -->
+
+        <!-- Bottom Image and Footer -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <!-- ScrollViewer fills available space -->
+                <RowDefinition Height="40" />
+                <!-- Fixed-height footer -->
+            </Grid.RowDefinitions>
+
+            <!-- The ScrollViewer by default will stretch to fill the space allocated by the Grid -->
+            <ScrollViewer Grid.Row="0"
+                x:Name="scrollViewerForImage"
+                MouseMove="TileSet_ScrollViewer_MouseMove"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto"
+                ScrollChanged="ScrollViewerForImage_ScrollChanged"
+                Background="Black">
+                <Grid MouseWheel="MyGrid_MouseWheel"
+                        Width="{Binding ActualWidth, ElementName=TileSetImage}"
+                        Height="{Binding ActualHeight, ElementName=TileSetImage}">
+                    <Grid.LayoutTransform>
+                        <ScaleTransform x:Name="UnifiedScaleTransform" ScaleX="1" ScaleY="1"/>
+                    </Grid.LayoutTransform>
+                    <Canvas x:Name="CheckerboardBackground"
+                        Width="{Binding ActualWidth, ElementName=TileSetImage}"
+                        Height="{Binding ActualHeight, ElementName=TileSetImage}"
+                        IsHitTestVisible="False"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top" />
+                    <Image x:Name="TileSetImage"
+                        Stretch="None"
+                        Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/blank.png"
+                        MouseDown="Image_MouseDown_Tileset"
+                        MouseMove="Image_MouseMove_Tileset"
+                        MouseUp="Image_MouseUp_Tileset"
+                        MouseEnter="Image_MouseEnter_Tileset"
+                        MouseLeave="Image_MouseLeave_Tileset"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top" />
+                    <Image x:Name="TileSetImagePreview"
+                        Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/blank.png"
+                        Stretch="None"
+                        IsHitTestVisible="False"
+                        Width="{Binding ActualWidth, ElementName=TileSetImage}"
+                        Height="{Binding ActualHeight, ElementName=TileSetImage}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top" />
+                    <Canvas x:Name="overlayTilesetGrid"
+                        Width="{Binding ActualWidth, ElementName=TileSetImage}"
+                        Height="{Binding ActualHeight, ElementName=TileSetImage}"
+                        IsHitTestVisible="False"
+                        Background="Transparent"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top" />
+                    <Canvas x:Name="overlayTilesetSelection"
+                        Width="{Binding ActualWidth, ElementName=TileSetImage}"
+                        Height="{Binding ActualHeight, ElementName=TileSetImage}"
+                        IsHitTestVisible="False"
+                        Background="Transparent"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top" />
+                    <Canvas x:Name="overlayTilesetCursor"
+                        Width="{Binding ActualWidth, ElementName=TileSetImage}"
+                        Height="{Binding ActualHeight, ElementName=TileSetImage}"
+                        IsHitTestVisible="False"
+                        Background="Transparent"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top">
+                        <Line x:Name="PlayLine" Stroke="Red" StrokeThickness="2" />
+                    </Canvas>
+                </Grid>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Border Grid.Row="1" Background="#0D1117">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Left group -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Expanding space -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Right group -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left controls -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Image Width="16" Height="16"
+                         x:Name="cursorloc"
+                         Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/cursorloc.png"/>
+
+                        <TextBox x:Name="mouseLoc"
+                                Width="70"
+                                TextAlignment="Left"
+                                Height="15"
+                                IsReadOnly="True"
+                                BorderBrush="Transparent" 
+                                BorderThickness="0" 
+                                Background="#0D1117"
+                                Foreground="#C2C3C5"
+                                Padding="0,0,0,0"
+                                FontSize="10"></TextBox>
+
+                        <TextBox x:Name="gridLoc"
+                                Width="70"
+                                TextAlignment="Left"
+                                Height="15"
+                                IsReadOnly="True"
+                                BorderBrush="Transparent" 
+                                BorderThickness="0" 
+                                Background="#0D1117"
+                                Foreground="#C2C3C5"
+                                Padding="0,0,0,0"
+                                FontSize="10"></TextBox>
+                        
+                        <StackPanel Orientation="Vertical" Margin="0,6,0,0">
+                            <CheckBox x:Name="GridOverlayCheckBox" Content="Grid Overlay"
+                                FontSize="10"
+                                Foreground="#C2C3C5"
+                                IsChecked="True"
+                                Checked="CheckBox_Checked_GridOverlay"
+                                Unchecked="CheckBox_UnChecked_GridOverlay"/>
+                            <CheckBox x:Name="CheckeredUnderlayCheckBox" Content="Checkered Underlay"
+                                FontSize="10"
+                                Foreground="#C2C3C5"
+                                IsChecked="True"
+                                Checked="CheckBox_Checked_CheckerboardUnderlay"
+                                Unchecked="CheckBox_UnChecked_CheckerboardUnderlay"/>
+                        </StackPanel>
+                        
+                        <Image Width="16" Height="16"
+                            Visibility="Hidden"
+                            x:Name="selectloc"
+                            Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/selectloc.png"/>
+                        <TextBox x:Name="selectionRectTxtBox"
+                            Visibility="Hidden"
+                            Width="50"
+                            TextAlignment="Left"
+                            Height="15"
+                            IsReadOnly="True"
+                            BorderBrush="Transparent" 
+                            BorderThickness="0" 
+                            Background="#0D1117"
+                            Foreground="#C2C3C5"
+                            Padding="0,0,0,0"
+                            FontSize="10"></TextBox>
+
+                        <Image Width="16" Height="16"
+                            Visibility="Hidden"
+                            x:Name="imgdims"
+                            Margin="10,0,0,0"
+                            Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/imgdims.png"/>
+                        <TextBox x:Name="imgDimensions"
+                            Visibility="Hidden"
+                            Width="60"
+                            TextAlignment="Left"
+                            Height="15"
+                            IsReadOnly="True"
+                            BorderBrush="Transparent" 
+                            BorderThickness="0" 
+                            Background="#0D1117"
+                            Foreground="#C2C3C5"
+                            Padding="0,0,0,0"
+                            FontSize="10"></TextBox>
+
+                    </StackPanel>
+
+
+                    <!-- Right controls -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="32" />
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="32" />
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="32" />
+                            </Grid.ColumnDefinitions>
+                            <Button Click="About_Click" Grid.Column="0"
+                                Focusable="False"
+                                IsTabStop="False"
+                                ToolTip="About"
+                                BorderBrush="Transparent" 
+                                BorderThickness="0" 
+                                Background="Transparent">
+                                    <Image Width="32" Height="32"
+                                    Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/about.png"
+                                    ToolTip="About"/>
+                            </Button>
+                            <ComboBox x:Name="ZoomComboBox" Grid.Column="1"
+                                  FontSize="10"
+                                  Margin="0,10,0,10"
+                                  Width="50"
+                                  IsEditable="True"
+                                  Text="100%"
+                                  SelectionChanged="ZoomComboBox_SelectionChanged"
+                                  LostFocus="ZoomComboBox_LostFocus">
+                                <ComboBoxItem Content="50%" />
+                                <ComboBoxItem Content="75%" />
+                                <ComboBoxItem Content="100%" />
+                                <ComboBoxItem Content="200%" />
+                                <ComboBoxItem Content="300%" />
+                                <ComboBoxItem Content="400%" />
+                                <ComboBoxItem Content="500%" />
+                                <ComboBoxItem Content="600%" />
+                                <ComboBoxItem Content="700%" />
+                                <ComboBoxItem Content="800%" />
+                            </ComboBox>
+                            <Button Click="ZoomOut_Click" Grid.Column="2"
+                                x:Name="zoomOut"
+                                Focusable="False"
+                                IsTabStop="False"
+                                ToolTip="Zoom out"
+                                BorderBrush="Transparent" 
+                                BorderThickness="0" 
+                                Background="Transparent">
+                                <Image Width="32" Height="32"
+                                   x:Name="zommOutImg"
+                                   Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/zoomout.png"
+                                   ToolTip="Zoom out"/>
+                            </Button>
+                            <Slider x:Name="ZoomSlider" Grid.Column="3"
+                                Minimum="0.5"
+                                Maximum="10.0"
+                                Value="1.0"
+                                TickFrequency="0.1"
+                                SmallChange="0.25"
+                                LargeChange="0.5"
+                                IsSnapToTickEnabled="True"
+                                Margin="10"
+                                ValueChanged="ZoomSlider_ValueChanged"
+                                Background="White"
+                                Foreground="White">
+                                <Slider.Resources>
+                                    <SolidColorBrush x:Key="TrackFill" Color="#FF4CC2FF"/>
+                                    <SolidColorBrush x:Key="ThumbFill" Color="DodgerBlue"/>
+                                </Slider.Resources>
+                            </Slider>
+                            <Button Click="ZoomIn_Click" Grid.Column="4"
+                                x:Name="zoomIn"
+                                Focusable="False"
+                                IsTabStop="False"
+                                ToolTip="Zoom in"
+                                BorderBrush="Transparent" 
+                                BorderThickness="0" 
+                                Background="Transparent">
+                                <Image Width="32" Height="32"
+                                   x:Name="zommInImg"
+                                   Source="pack://application:,,,/Controls/MidiEditorControl/MidiEditorImages/zoomin.png"
+                                   ToolTip="Zoom in"/>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="LoadingOverlay"
+                        Visibility="Collapsed"
+                        Background="#AA000000"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Loading: " 
+                                x:Name="LoadingTextBlock"
+                                Foreground="White" 
+                                FontSize="18" 
+                                FontWeight="Bold"
+                                Margin="0,0,0,10" />
+                <ProgressBar IsIndeterminate="True" 
+                                Width="200" 
+                                Height="15" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+
+</UserControl>

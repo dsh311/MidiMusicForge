@@ -1,0 +1,565 @@
+﻿/*
+ * Copyright (C) 2025 David S. Shelley <davidsmithshelley@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License 
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using System.Windows.Threading;
+
+namespace MidiMusicForge.Controls.MidiEditorControl.MidiEditorUtils
+{
+    public static class GraphicsUtils
+    {
+        public static Task WaitForRender()
+        {
+            // Create a TaskCompletionSource which we can manually complete
+            var tcs = new TaskCompletionSource<bool>();
+
+            // Queue an action to the dispatcher with the lowest priority.
+            // This action will only execute when the UI thread is idle and has
+            // finished processing all higher-priority tasks (like rendering).
+            Application.Current.Dispatcher.BeginInvoke(
+                new Action(() => tcs.SetResult(true)),
+                DispatcherPriority.ApplicationIdle);
+
+            return tcs.Task;
+        }
+
+        public static void DrawSelectionRectangle(
+                                                    Canvas drawOnCanvas,
+                                                    int rowStart,
+                                                    int colStart,
+                                                    int rowEnd,
+                                                    int colEnd,
+                                                    int gridDim,
+                                                    SolidColorBrush fillColor,
+                                                    bool shouldUseEllipse = false)
+        {
+            int rowFinalStart = rowStart;
+            int rowFinalEnd = rowEnd;
+            int colFinalStart = colStart;
+            int colFinalEnd = colEnd;
+
+            // Normalize the rectangle coordinates
+            int x = Math.Min(colFinalStart, colFinalEnd) * gridDim;
+            int y = Math.Min(rowFinalStart, rowFinalEnd) * gridDim;
+
+            // This might not be needed since the selection rect already has a fixed width and height
+            int width = (Math.Abs(colFinalEnd - colFinalStart) + 1) * gridDim;
+            int height = (Math.Abs(rowFinalEnd - rowFinalStart) + 1) * gridDim;
+
+
+            // Remove all selection rectangles
+            drawOnCanvas.Children.Clear();
+
+            //In WPF, positioning of visual elements like a Rectangle on a Canvas is
+            //handled by the parent container, not by the shape itself.
+
+            if (shouldUseEllipse)
+            {
+                // Create an ellipse
+                Ellipse selectionOval = new Ellipse
+                {
+                    Stroke = Brushes.Blue,
+                    StrokeThickness = 1,
+                    Fill = fillColor,
+                    Width = width,
+                    Height = height
+                };
+
+                Canvas.SetLeft(selectionOval, x);
+                Canvas.SetTop(selectionOval, y);
+
+                drawOnCanvas.Children.Add(selectionOval);
+            }
+
+            if (!shouldUseEllipse)
+            {
+                Rectangle selectionRect = new Rectangle
+                {
+                    Stroke = Brushes.Blue,
+                    StrokeThickness = 1,
+                    Fill = fillColor, // semi-transparent blue
+                    Width = width,
+                    Height = height
+                };
+                Canvas.SetLeft(selectionRect, x);
+                Canvas.SetTop(selectionRect, y);
+
+                drawOnCanvas.Children.Add(selectionRect);
+            }
+        }
+
+        public static void DrawGridOnCanvas(Canvas drawOnThisCanvas, double imageWidth, double imageHeight, int tileSize, SolidColorBrush theColor, double thickness)
+        {
+            if (drawOnThisCanvas == null)
+            {
+                return;
+            }
+            drawOnThisCanvas.Children.Clear(); // Optional: clear existing lines
+
+            int numVerticalLines = (int)Math.Floor(imageWidth / tileSize);
+            int numHorizontalLines = (int)Math.Floor(imageHeight / tileSize);
+
+            // Vertical lines
+            for (int i = 0; i <= numVerticalLines; i++)
+            {
+                double x = i * tileSize;
+                Line verticalLine = new Line
+                {
+                    X1 = x,
+                    Y1 = 0,
+                    X2 = x,
+                    Y2 = imageHeight,
+                    Stroke = theColor,
+                    StrokeThickness = thickness
+                };
+                drawOnThisCanvas.Children.Add(verticalLine);
+            }
+
+            // Horizontal lines
+            for (int i = 0; i <= numHorizontalLines; i++)
+            {
+                double y = i * tileSize;
+                Line horizontalLine = new Line
+                {
+                    X1 = 0,
+                    Y1 = y,
+                    X2 = imageWidth,
+                    Y2 = y,
+                    Stroke = theColor,
+                    StrokeThickness = thickness
+                };
+                drawOnThisCanvas.Children.Add(horizontalLine);
+            }
+
+        }
+
+        public static void DrawCheckerboard(Canvas canvas, double tileSize = 16)
+        {
+            if (canvas == null)
+            {
+                return;
+            }
+            canvas.Children.Clear();
+
+            int rows = (int)Math.Floor(canvas.Height / tileSize);
+            int cols = (int)Math.Floor(canvas.Width / tileSize);
+
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < cols; col++)
+                {
+                    if ((row + col) % 2 == 0)
+                    {
+                        Rectangle rect = new Rectangle
+                        {
+                            Width = tileSize,
+                            Height = tileSize,
+                            Fill = new SolidColorBrush(Color.FromArgb(100, 200, 200, 200))
+                        };
+                        Canvas.SetLeft(rect, col * tileSize);
+                        Canvas.SetTop(rect, row * tileSize);
+                        canvas.Children.Add(rect);
+                    }
+                }
+            }
+        }
+
+        public static void transparentImage(Image thisImage)
+        {
+            // Clear the tileMapImgPreview to transparent
+            // The image may not have a source yet
+            int width = (int)(thisImage.Source?.Width > 0 ? thisImage.Source.Width : thisImage.ActualWidth);
+            int height = (int)(thisImage.Source?.Height > 0 ? thisImage.Source.Height : thisImage.ActualHeight);
+
+            if (width > 0 && height > 0)
+            {
+                // Create a transparent WriteableBitmap
+                var wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+                int stride = wb.BackBufferStride;
+
+                int pixelCount = height * stride;
+                // This creates byte array filled with zeros, so alpha
+                // Transparent black (B=0, G=0, R=0, A=0) in BGRA32 format.
+                byte[] pixels = new byte[pixelCount];
+
+                // All bytes already zero by default => transparent BGRA
+                wb.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+
+                thisImage.Source = wb;
+            }
+        }
+
+        public static WriteableBitmap? resizeImageSource(Image imageControl, int newWidth, int newHeight)
+        {
+            if (imageControl?.Source is BitmapSource originalBitmap)
+            {
+                // Create the WriteableBitmap with the full desired size
+                WriteableBitmap writable = new WriteableBitmap(
+                    newWidth,
+                    newHeight,
+                    originalBitmap.DpiX,
+                    originalBitmap.DpiY,
+                    originalBitmap.Format,
+                    originalBitmap.Palette);
+
+                // Determine how much of the original to copy
+                int copyWidth = Math.Min(newWidth, originalBitmap.PixelWidth);
+                int copyHeight = Math.Min(newHeight, originalBitmap.PixelHeight);
+                var srcRect = new Int32Rect(0, 0, copyWidth, copyHeight);
+
+                int bytesPerPixel = (originalBitmap.Format.BitsPerPixel + 7) / 8;
+                int stride = copyWidth * bytesPerPixel;
+                byte[] pixels = new byte[stride * copyHeight];
+
+                // Copy from original to buffer
+                originalBitmap.CopyPixels(srcRect, pixels, stride, 0);
+
+                // Write to the top-left corner of the new bitmap
+                writable.WritePixels(new Int32Rect(0, 0, copyWidth, copyHeight), pixels, stride, 0);
+
+                return writable;
+            }
+            return null;
+        }
+
+        public static WriteableBitmap createColoredBitmap(int width, int height, SolidColorBrush fillColor)
+        {
+            if (width < 0 || height < 0)
+            {
+                //return null;
+                throw new ArgumentException("Width and height must be positive.");
+            }
+
+            var wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+            int stride = wb.BackBufferStride;
+            int totalBytes = height * stride;
+            byte[] pixels = new byte[totalBytes];
+
+            // Extract BGRA components from the SolidColorBrush
+            Color color = fillColor.Color;
+            byte[] colorBytes = new byte[] { color.B, color.G, color.R, color.A };
+
+            // Fill one row with the color
+            byte[] oneRow = new byte[stride];
+            for (int x = 0; x < width; x++)
+            {
+                Buffer.BlockCopy(colorBytes, 0, oneRow, x * 4, 4);
+            }
+
+            // Copy the row into each row of the full pixel array
+            for (int y = 0; y < height; y++)
+            {
+                Buffer.BlockCopy(oneRow, 0, pixels, y * stride, stride);
+            }
+
+            wb.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+            return wb;
+        }
+
+        public static void CopyImageRegion(
+                                            WriteableBitmap source,
+                                            int sourceRow,
+                                            int sourceColumn,
+                                            WriteableBitmap destination,
+                                            int destRow,
+                                            int destColumn,
+                                            int selectedRegionWidth,
+                                            int selectedRegionHeight,
+                                            int gridDim,
+                                            bool shouldBlend = false,
+                                            bool useEllipse = true)
+        {
+            int bytesPerPixel = source.Format.BitsPerPixel / 8;
+            //if (bytesPerPixel != 4)
+            if (source.Format != PixelFormats.Bgra32 && source.Format != PixelFormats.Pbgra32)
+            {
+                throw new NotSupportedException("Only 32bpp images are supported.");
+            }
+
+            int sourceStartX = sourceColumn * gridDim;
+            int sourceStartY = sourceRow * gridDim;
+            int destStartX = destColumn * gridDim;
+            int destStartY = destRow * gridDim;
+
+            int stride = selectedRegionWidth * bytesPerPixel;
+
+            byte[] sourcePixels = new byte[selectedRegionHeight * stride];
+            byte[] destPixels = new byte[selectedRegionHeight * stride];
+
+            int numColumnsInDestImage = (int)Math.Floor(destination.Width / gridDim);
+            int numRowsInDestImage = (int)Math.Floor(destination.Height / gridDim);
+            int numColumnsInSelection = selectedRegionWidth / gridDim;
+            int numRowsInSelection = selectedRegionHeight / gridDim;
+
+            if (destColumn + numColumnsInSelection <= numColumnsInDestImage &&
+                destRow + numRowsInSelection <= numRowsInDestImage)
+            {
+                source.CopyPixels(
+                    new Int32Rect(sourceStartX, sourceStartY, selectedRegionWidth, selectedRegionHeight),
+                    sourcePixels,
+                    stride,
+                    0);
+
+                if (shouldBlend || useEllipse)
+                {
+                    destination.CopyPixels(
+                        new Int32Rect(destStartX, destStartY, selectedRegionWidth, selectedRegionHeight),
+                        destPixels,
+                        stride,
+                        0);
+                }
+
+                // Ellipse bounds
+                float rx = selectedRegionWidth / 2f;
+                float ry = selectedRegionHeight / 2f;
+                float cx = rx;
+                float cy = ry;
+
+                for (int y = 0; y < selectedRegionHeight; y++)
+                {
+                    for (int x = 0; x < selectedRegionWidth; x++)
+                    {
+                        // If useEllipse is true, skip pixels outside the ellipse
+                        if (useEllipse)
+                        {
+                            float dx = x - cx;
+                            float dy = y - cy;
+                            if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) > 1)
+                                continue;
+                        }
+
+                        int pixelIndex = (y * selectedRegionWidth + x) * bytesPerPixel;
+
+                        byte srcB = sourcePixels[pixelIndex + 0];
+                        byte srcG = sourcePixels[pixelIndex + 1];
+                        byte srcR = sourcePixels[pixelIndex + 2];
+                        byte srcA = sourcePixels[pixelIndex + 3];
+
+                        if (shouldBlend)
+                        {
+                            byte dstB = destPixels[pixelIndex + 0];
+                            byte dstG = destPixels[pixelIndex + 1];
+                            byte dstR = destPixels[pixelIndex + 2];
+                            byte dstA = destPixels[pixelIndex + 3];
+
+                            float srcAlpha = srcA / 255f;
+                            float invSrcAlpha = 1f - srcAlpha;
+
+                            destPixels[pixelIndex + 0] = (byte)(srcB * srcAlpha + dstB * invSrcAlpha);
+                            destPixels[pixelIndex + 1] = (byte)(srcG * srcAlpha + dstG * invSrcAlpha);
+                            destPixels[pixelIndex + 2] = (byte)(srcR * srcAlpha + dstR * invSrcAlpha);
+                            destPixels[pixelIndex + 3] = (byte)Math.Min(255, srcA + dstA * invSrcAlpha);
+                        }
+                        else
+                        {
+                            destPixels[pixelIndex + 0] = srcB;
+                            destPixels[pixelIndex + 1] = srcG;
+                            destPixels[pixelIndex + 2] = srcR;
+                            destPixels[pixelIndex + 3] = srcA;
+                        }
+                    }
+                }
+
+                destination.WritePixels(
+                    new Int32Rect(destStartX, destStartY, selectedRegionWidth, selectedRegionHeight),
+                    destPixels,
+                    stride,
+                    0);
+            }
+        }
+
+        public static void DrawSquareLineOnImage(Image targetImage, Point pointA, Point pointB, int gridDimension, Color color)
+        {
+            double dx = pointB.X - pointA.X;
+            double dy = pointB.Y - pointA.Y;
+
+            double steps = Math.Max(Math.Abs(dx), Math.Abs(dy));
+
+            double xIncrement = dx / steps;
+            double yIncrement = dy / steps;
+
+            double x = pointA.X;
+            double y = pointA.Y;
+
+            for (int i = 0; i <= steps; i++)
+            {
+                Point pixelPosition = new Point((int)Math.Round(x), (int)Math.Round(y));
+                DrawSquareOnImage(targetImage, pixelPosition, gridDimension, color);
+
+                x += xIncrement;
+                y += yIncrement;
+            }
+
+        }
+
+        public static void DrawLineOnImage(Image targetImage, Point pointA, Point pointB, Color color)
+        {
+            WriteableBitmap bmp;
+            bool shouldSaveBackSinceCopied = false;
+            if (targetImage.Source is WriteableBitmap writable)
+            {
+                bmp = writable;
+            }
+            else if (targetImage.Source is FormatConvertedBitmap || targetImage.Source is CachedBitmap || targetImage.Source is BitmapSource)
+            {
+                var source = targetImage.Source as BitmapSource;
+                if (source == null)
+                    throw new InvalidOperationException("The Image.Source must be a BitmapSource-compatible type.");
+
+                bmp = new WriteableBitmap(source);
+                shouldSaveBackSinceCopied = true;
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported Image.Source type: " + targetImage.Source.GetType().Name);
+            }
+
+            int x0 = (int)pointA.X;
+            int y0 = (int)pointA.Y;
+            int x1 = (int)pointB.X;
+            int y1 = (int)pointB.Y;
+
+            int dx = Math.Abs(x1 - x0);
+            int dy = Math.Abs(y1 - y0);
+            int sx = x0 < x1 ? 1 : -1;
+            int sy = y0 < y1 ? 1 : -1;
+            int err = dx - dy;
+
+            byte[] pixelColor = { color.B, color.G, color.R, color.A }; // BGRA
+
+            bmp.Lock(); // Lock the bitmap for writing
+
+            while (true)
+            {
+                if (x0 >= 0 && x0 < bmp.PixelWidth && y0 >= 0 && y0 < bmp.PixelHeight)
+                {
+                    Int32Rect pixelRect = new Int32Rect(x0, y0, 1, 1);
+                    bmp.WritePixels(pixelRect, pixelColor, 4, 0);
+                }
+
+                if (x0 == x1 && y0 == y1) break;
+
+                int e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x0 += sx; }
+                if (e2 < dx) { err += dx; y0 += sy; }
+            }
+
+            bmp.Unlock(); // Unlock after writing
+
+            if (shouldSaveBackSinceCopied)
+            {
+                targetImage.Source = bmp;
+            }
+
+        }
+
+        public static void DrawPixelOnImage(Image targetImage, int theRow, int theColumn, Color fillColor)
+        {
+            int x = (int)theColumn;
+            int y = (int)theRow;
+
+            WriteableBitmap bmp = targetImage.Source as WriteableBitmap;
+            if (bmp == null || x < 0 || y < 0 || x >= bmp.PixelWidth || y >= bmp.PixelHeight)
+            {
+                return;
+            }
+
+            // BGRA format: Blue, Green, Red, Alpha
+            byte[] colorData = { fillColor.B, fillColor.G, fillColor.R, fillColor.A }; // Red pixel
+            Int32Rect rect = new Int32Rect(x, y, 1, 1);
+
+            bmp.WritePixels(rect, colorData, bmp.BackBufferStride, 0);
+        }
+
+        public static void DrawSquareOnImage(Image targetImage, Point clickPointLoc, int widthOfSquare, Color fillColor)
+        {
+            int width = (int)targetImage.Width;
+            int height = (int)targetImage.Height;
+
+            WriteableBitmap bmp = targetImage.Source as WriteableBitmap;
+
+            // If the source is not already a WriteableBitmap, convert it
+            if (bmp == null)
+            {
+                if (targetImage.Source is BitmapSource sourceBitmap)
+                {
+                    bmp = new WriteableBitmap(sourceBitmap);
+                }
+                else
+                {
+                    // If source is null or incompatible, make a new empty WriteableBitmap
+                    bmp = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+                }
+                targetImage.Source = bmp;
+            }
+
+            int bytesPerPixel = (bmp.Format.BitsPerPixel + 7) / 8;
+            int stride = bmp.PixelWidth * bytesPerPixel;
+
+            int half = widthOfSquare / 2;
+
+            int left = Math.Max((int)clickPointLoc.X - half, 0);
+            int top = Math.Max((int)clickPointLoc.Y - half, 0);
+            int right = Math.Min(left + widthOfSquare, bmp.PixelWidth);
+            int bottom = Math.Min(top + widthOfSquare, bmp.PixelHeight);
+
+            int rectWidth = right - left;
+            int rectHeight = bottom - top;
+
+            if (rectWidth <= 0 || rectHeight <= 0)
+                return;
+
+            // Create a buffer just for the square region
+            byte[] fillPixels = new byte[rectHeight * rectWidth * bytesPerPixel];
+
+            for (int y = 0; y < rectHeight; y++)
+            {
+                for (int x = 0; x < rectWidth; x++)
+                {
+                    int index = (y * rectWidth + x) * bytesPerPixel;
+                    fillPixels[index + 0] = fillColor.B;
+                    fillPixels[index + 1] = fillColor.G;
+                    fillPixels[index + 2] = fillColor.R;
+                    fillPixels[index + 3] = fillColor.A;
+                }
+            }
+
+            bmp.WritePixels(
+                new Int32Rect(left, top, rectWidth, rectHeight),
+                fillPixels,
+                rectWidth * bytesPerPixel, // stride for the small square buffer
+                0
+            );
+        }
+
+        public static (int, int) GetGridXYFromPosition(object sender, Point position, int gridDim)
+        {
+            int theColumn = -1;
+            int theRow = -1;
+            if (sender is Image clickedImage)
+            {
+                theColumn = (int)(position.X / gridDim);
+                theRow = (int)(position.Y / gridDim);
+            }
+            return (theRow, theColumn);
+        }
+    }
+}
