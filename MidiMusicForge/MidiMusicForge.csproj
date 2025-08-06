@@ -1,0 +1,94 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controls\TileEditorControl.xaml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\about.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\arrow.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\blank.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\cursorloc.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\fastforward.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\imgdims.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\pause.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\pencil.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\play.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\resizeimage.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\restart.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\rewind.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\select.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\selectGrid.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\selectloc.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\title.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\volume0.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\volume1.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\volume2.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\volume3.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\volumemute.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\zoomin.png" />
+    <None Remove="Controls\MidiEditorControl\MidiEditorImages\zoomout.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>4</VersionMinor>
+      <VersionMajor>2</VersionMajor>
+      <Guid>215d64d2-031c-33c7-96e3-61794cd1ee61</Guid>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Melanchall.DryWetMidi" Version="8.0.1" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\about.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\arrow.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\blank.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\cursorloc.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\fastforward.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\imgdims.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\openmidi.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\pause.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\pencil.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\play.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\resizeimage.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\restart.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\rewind.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\select.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\selectGrid.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\selectloc.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\title.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\volume0.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\volume1.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\volume2.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\volume3.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\volumemute.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\zoomin.png" />
+    <Resource Include="Controls\MidiEditorControl\MidiEditorImages\zoomout.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Songs\Test_AllCords.mid">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Songs\Test_AllNotes.mid">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Songs\Test_PianoBase.mid">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
