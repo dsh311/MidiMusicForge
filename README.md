@@ -1,5 +1,5 @@
 # MidiMusicForge
-A simple midi file player and visualizer that will soon be able to edit midi files.  
+A midi file player and visualizer that will soon be able to edit midi files.  
 Written with C# WPF and uses MIT licensed libraries [DryWetMidi](https://github.com/melanchall/drywetmidi) and [NAudio](https://github.com/naudio/NAudio).
 <img src="docs/MidiMusicForge3.gif" alt="MidiMusicForge" style="max-width: 100%; height: auto;" />
 ## How to use
